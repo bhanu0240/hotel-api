@@ -7,7 +7,7 @@ async function connectDB() {
   if (isConnected) return;
 
   try {
-    await mongoose.connect(process.env.DB_CONNECTION_URL, {
+    await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
