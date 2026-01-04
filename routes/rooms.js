@@ -1,11 +1,13 @@
 const express = require("express");
 const Room = require("../models/Room");
 const { protect, admin } = require("../middleware/auth");
+const connectDB = require("../db");
 const router = express.Router();
 
 // Get all rooms (public)
 router.get("/", async (req, res) => {
   try {
+    await connectDB();
     const rooms = await Room.find({});
     res.json(rooms);
   } catch (error) {
