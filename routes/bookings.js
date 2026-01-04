@@ -3,10 +3,12 @@ const Booking = require("../models/Booking");
 const Room = require("../models/Room");
 const { protect, admin } = require("../middleware/auth");
 const router = express.Router();
+const connectDB = require("../db");
 
 // Get all bookings (admin only)
 router.get("/", protect, admin, async (req, res) => {
   try {
+    await connectDB();
     const bookings = await Booking.find({})
       .populate("user", "name email")
       .populate("room", "roomNumber type price");
@@ -19,6 +21,7 @@ router.get("/", protect, admin, async (req, res) => {
 // Get user's bookings
 router.get("/my-bookings", protect, async (req, res) => {
   try {
+    await connectDB();
     const bookings = await Booking.find({ user: req.user._id }).populate(
       "room",
       "roomNumber type price"
@@ -32,6 +35,7 @@ router.get("/my-bookings", protect, async (req, res) => {
 // Create new booking
 router.post("/", protect, async (req, res) => {
   try {
+    await connectDB();
     const { roomId, checkIn, checkOut } = req.body;
 
     // Validate dates
@@ -119,6 +123,7 @@ router.post("/", protect, async (req, res) => {
 // Cancel booking
 router.put("/:id/cancel", protect, async (req, res) => {
   try {
+    await connectDB();
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {

@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const User = require("../models/User");
 const TokenBlacklist = require("../models/TokenBlacklist");
 const { protect, admin } = require("../middleware/auth");
+const connectDB = require("../db");
 const router = express.Router();
 
 // Rate limiter for forgot-password route
@@ -50,6 +51,7 @@ async function verifyRecaptcha(token) {
 // Register a new user (customer only)
 router.post("/register", async (req, res) => {
   try {
+    await connectDB();
     const { name, email, password } = req.body;
 
     // Check if user already exists
@@ -95,6 +97,7 @@ router.post("/register", async (req, res) => {
 // Login user
 router.post("/login", async (req, res) => {
   try {
+    await connectDB();
     const { email, password } = req.body;
 
     // Find user
@@ -132,6 +135,7 @@ router.post("/login", async (req, res) => {
 // Forgot password - send reset link (generic response)
 router.post("/forgot-password", forgotLimiter, async (req, res) => {
   try {
+    await connectDB();
     const { email, recaptchaToken } = req.body;
 
     // If reCAPTCHA is configured, verify it first
@@ -201,6 +205,7 @@ router.post("/forgot-password", forgotLimiter, async (req, res) => {
 // Reset password using token
 router.post("/reset-password/:token", async (req, res) => {
   try {
+    await connectDB();
     const hashedToken = crypto
       .createHash("sha256")
       .update(req.params.token)
@@ -237,6 +242,7 @@ router.post("/reset-password/:token", async (req, res) => {
 // Create admin user (protected route, only existing admins can create new admins)
 router.post("/register-admin", protect, admin, async (req, res) => {
   try {
+    await connectDB();
     const { name, email, password } = req.body;
 
     // Check if user already exists
@@ -267,6 +273,7 @@ router.post("/register-admin", protect, admin, async (req, res) => {
 // Logout user (blacklist current token)
 router.post("/logout", protect, async (req, res) => {
   try {
+    await connectDB();
     const token = req.token;
     const decoded = jwt.decode(token);
 
@@ -286,6 +293,7 @@ router.post("/logout", protect, async (req, res) => {
 // Logout from all devices (blacklist all tokens by updating passwordChangedAt)
 router.post("/logout-all", protect, async (req, res) => {
   try {
+    await connectDB();
     // Update passwordChangedAt to invalidate all existing tokens
     const user = await User.findById(req.user._id);
     user.passwordChangedAt = Date.now();
@@ -328,6 +336,7 @@ router.get("/me", protect, async (req, res) => {
 // Get all users (admin only)
 router.get("/users", protect, admin, async (req, res) => {
   try {
+    await connectDB();
     // Exclude password field
     const users = await User.find({}).select("-password");
     res.json(users);

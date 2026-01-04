@@ -18,6 +18,7 @@ router.get("/", async (req, res) => {
 // Get single room (public)
 router.get("/:id", async (req, res) => {
   try {
+    await connectDB();
     const room = await Room.findById(req.params.id);
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
@@ -31,6 +32,7 @@ router.get("/:id", async (req, res) => {
 // Create room (admin only)
 router.post("/", protect, admin, async (req, res) => {
   try {
+    await connectDB();
     const { roomNumber, type, price, description, amenities } = req.body;
     const room = await Room.create({
       roomNumber,
@@ -48,6 +50,7 @@ router.post("/", protect, admin, async (req, res) => {
 // Update room (admin only)
 router.put("/:id", protect, admin, async (req, res) => {
   try {
+    await connectDB();
     const { roomNumber, type, price, description, amenities, isAvailable } =
       req.body;
     const room = await Room.findById(req.params.id);
@@ -74,6 +77,7 @@ router.put("/:id", protect, admin, async (req, res) => {
 // Delete room (admin only)
 router.delete("/:id", protect, admin, async (req, res) => {
   try {
+    await connectDB();
     const room = await Room.findById(req.params.id);
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
